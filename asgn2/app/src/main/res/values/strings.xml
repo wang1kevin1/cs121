@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">asgn2</string>
+
+    <string name="assignment">ASSIGNMENT 2</string>
+
+    <string name="activity_download">DOWNLOAD</string>
+    <string name="activity_delete">DELETE</string>
+    <string name="activity_view">VIEW</string>
+    <string name="activity_range">RANGE</string>
+</resources>
