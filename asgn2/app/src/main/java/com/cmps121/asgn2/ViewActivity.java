@@ -30,18 +30,20 @@ public class ViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
 
+        mDatabaseUtil = new DatabaseUtil(ViewActivity.this);
+
         itemRecyclerView = findViewById(R.id.viewRecyclerView);
 
         // populate items
         itemList = new ArrayList<Item>(mDatabaseUtil.getAllItems());
 
+        // specify an adapter
+        itemAdapter = new ItemRecyclerAdapter(itemList, getApplication());
+
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(ViewActivity.this,
                 LinearLayoutManager.VERTICAL, false);
         itemRecyclerView.setLayoutManager(layoutManager);
-
-        // specify an adapter
-        itemAdapter = new ItemRecyclerAdapter(itemList, getApplication());
 
         // set adapter
         itemRecyclerView.setAdapter(itemAdapter);

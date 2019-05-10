@@ -169,8 +169,8 @@ public class DatabaseUtil extends SQLiteOpenHelper {
 
                     // initialize new item
                     Item item = new Item();
-                    item.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
-                    item.setTitle(cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
+                    item.setID(Integer.parseInt(cursor.getString(0)));
+                    item.setTitle(cursor.getString(1));
                     item.setBitmap(bitmap);
 
                     // add item to list

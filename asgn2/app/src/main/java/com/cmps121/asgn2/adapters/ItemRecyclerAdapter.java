@@ -58,9 +58,9 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         Item item = itemList.get(position);
 
         // get item attributes
-        int id = item.getID();
         String title = item.getTitle();
         Bitmap bitmap = item.getBitmap();
+        String id = Integer.toString(item.getID());
 
         // populate view holder
         holder.vTitle.setText(title);
