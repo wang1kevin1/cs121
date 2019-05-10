@@ -17,7 +17,6 @@
             android:name=".MenuActivity"
             android:label="@string/assignment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,17 +28,18 @@
             android:name=".DownloadActivity"
             android:label="@string/activity_download"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
-
         <activity
             android:name=".DeleteActivity"
             android:label="@string/activity_delete"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
-
         <activity
             android:name=".ViewActivity"
             android:label="@string/activity_view"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
-
+        <activity
+            android:name=".RangeActivity"
+            android:label="@string/activity_range"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
     </application>
 
 </manifest>
