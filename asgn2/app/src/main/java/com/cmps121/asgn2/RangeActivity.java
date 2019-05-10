@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.cmps121.asgn2.adapters.ItemRecyclerAdapter;
 import com.cmps121.asgn2.models.Item;
@@ -55,27 +56,44 @@ public class RangeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 displayItem(v);
+
+                // specify an adapter
+                itemAdapter = new ItemRecyclerAdapter(itemList, getApplication());
+
+                // use a linear layout manager
+                layoutManager = new LinearLayoutManager(RangeActivity.this,
+                        LinearLayoutManager.VERTICAL, false);
+                itemRecyclerView.setLayoutManager(layoutManager);
+
+                // set adapter
+                itemRecyclerView.setAdapter(itemAdapter);
             }
         });
 
     }
 
     public void displayItem(View view){
-        mStart = Integer.parseInt(mEditStart.getText().toString().trim());
-        mEnd = Integer.parseInt(mEditEnd.getText().toString().trim());
+        // clear items
+        itemList = null;
 
-        // populate items
-        itemList = new ArrayList<Item>(mDatabaseUtil.getRangeItems(mStart, mEnd));
+        // get range
+        String start = mEditStart.getText().toString().trim();
+        String end = mEditEnd.getText().toString().trim();
 
-        // specify an adapter
-        itemAdapter = new ItemRecyclerAdapter(itemList, getApplication());
+        // check that range isn't empty
+        if(!start.isEmpty() && !end.isEmpty()) {
+            mStart = Integer.parseInt(start);
+            mEnd = Integer.parseInt(end);
 
-        // use a linear layout manager
-        layoutManager = new LinearLayoutManager(RangeActivity.this,
-                LinearLayoutManager.VERTICAL, false);
-        itemRecyclerView.setLayoutManager(layoutManager);
-
-        // set adapter
-        itemRecyclerView.setAdapter(itemAdapter);
+            // invalid range
+            if (mStart > mEnd)
+                Toast.makeText(RangeActivity.this, "Invalid Range", Toast.LENGTH_LONG).show();
+            else {
+                // populate items
+                itemList = new ArrayList<Item>(mDatabaseUtil.getRangeItems(mStart, mEnd));
+            }
+        } else { // empty range fields
+            Toast.makeText(RangeActivity.this, "Please Enter a Range", Toast.LENGTH_LONG).show();
+        }
     }
 }
