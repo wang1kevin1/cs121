@@ -14,86 +14,120 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-public class DatabaseUtil extends SQLiteOpenHelper {
+import com.cmps121.asgn2.models.Item;
 
-    public static final String DATABASE_NAME    = "database";
-    public static final String TABLE_NAME       = "db_images";
-    public static final int DATABASE_VERSION    = 1;
-    public static final String CREATE_TABLE     = "CREATE TABLE IF NOT EXISTS "+ TABLE_NAME +
-            "(db_id INTEGER PRIMARY KEY AUTOINCREMENT, image BLOB NOT NULL, title TEXT DEFAULT 'Title')";
-    public static final String DELETE_TABLE     = "DROP TABLE IF EXISTS " + TABLE_NAME;
+public class DatabaseUtil extends SQLiteOpenHelper {
+    // http://whats-online.info/science-and-tutorials/127/Android-SQLite-database-step-by-step-tutorial-for-beginners/
+
+    // Database Version
+    private static final int DATABASE_VERSION   = 1;
+
+    // Database Name
+    private static final String DATABASE_NAME   = "asgn2_database";
+
+    // Table Name
+    private static final String TABLE_NAME      = "db_items";
+
+    // Items Table Column Names
+    private static final String KEY_ID = "id";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_BITMAP = "bitmap";
+
 
     public DatabaseUtil(Context context)  {
+
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    //Create tables
+    @Override
     public void onCreate(SQLiteDatabase db)  {
+        String CREATE_TABLE     = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "("
+                + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_TITLE + " TEXT DEFAULT \'Title\',"
+                + KEY_BITMAP + " BLOB NOT NULL" + ")";
+
         db.execSQL(CREATE_TABLE);
     }
 
     //Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        db.execSQL(DELETE_TABLE); // Delete old table
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME); // Delete old table
 
         onCreate(db); // recreate tables
     }
 
-    public void insertBitmap(Bitmap bitmap, String title)  {
+    /**
+     * Some CRUD Operations
+     */
 
-        // Convert the image into byte array
+    public void addItem(Item item)  {
+        Bitmap bitmap = item.getBitmap();
+        String title = item.getTitle();
+
+        // convert bitmap to byte array
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] buffer = byteArrayOutputStream.toByteArray();
 
-        // Open the database for writing
+        // open database for writing
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Start the transaction.
+        // start transaction
         db.beginTransaction();
         ContentValues values;
 
         try {
             values = new ContentValues();
-            values.put("image", buffer);
-            values.put("title", title);
-            // Insert Row
-            long i = db.insert(TABLE_NAME, null, values);
-            Log.i("Insert", i + "");
-            // Insert into database successfully.
-            db.setTransactionSuccessful();
+            values.put(KEY_TITLE, title);
+            values.put(KEY_BITMAP, buffer);
 
+            // insert item
+            long i = db.insert(TABLE_NAME, null, values);
+
+            Log.i("addItem", i + "");
+
+            // successfully added
+            db.setTransactionSuccessful();
         }
         catch (SQLiteException e) {
             e.printStackTrace();
         }
         finally
         {
-            // End the transaction.
+            // end transaction
             db.endTransaction();
 
-            // Close database
+            // close database
             db.close();
         }
     }
 
-    public boolean deleteBitmap(int id, String title) {
+    public boolean deleteItem(Item item) {
+        int id = item.getID();
+        String title = item.getTitle();
 
         boolean response = true;
 
-        // Open the database for writing
+        // open database for writing
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Start the transaction
+        // start transaction
         db.beginTransaction();
 
         try {
-            if(getBitmapById(id) == null && getBitmapByTitle(title) == null)
+            if(getItemById(id) == null && getItemByTitle(title) == null)
                 return false;
 
-            String deleteQuery = "DELETE FROM " + TABLE_NAME + " WHERE db_id = " + id + " OR title = " + title;
+            String deleteQuery = "DELETE FROM " + TABLE_NAME
+                    + " WHERE " + KEY_ID + " = " + id
+                    + " OR " + KEY_TITLE + " = " + title;
+
+            // remove item
             db.execSQL(deleteQuery);
+
+            // successfully deleted
             db.setTransactionSuccessful();
         }
         catch(SQLiteException e) {
@@ -101,177 +135,240 @@ public class DatabaseUtil extends SQLiteOpenHelper {
             response = false;
         }
         finally {
-
-            // End the transaction
+            // end transaction
             db.endTransaction();
 
-            // Close database
+            // close database
             db.close();
         }
         return response;
     }
 
-    public List<Bitmap> getAllBitmaps() {
+    public List<Item> getAllItems() {
+        List<Item> itemList = new ArrayList<Item>();
 
-        List<Bitmap> bitmaps = new ArrayList<>();
-
-        // Open the database for reading
+        // open database for reading
         SQLiteDatabase db = this.getReadableDatabase();
 
+        // start transaction
         db.beginTransaction();
 
         try {
             String selectQuery = "SELECT * FROM " + TABLE_NAME;
+
             Cursor cursor = db.rawQuery(selectQuery, null);
-            if(cursor.getCount() > 0) {
-                while(cursor.moveToNext()) {
 
-                    // Convert blob data to byte array
-                    byte[] blob = cursor.getBlob(cursor.getColumnIndex("image"));
+            // loop through all rows and add to list
+            if(cursor.moveToFirst()) {
+                do {
+                    // convert blob data to byte array
+                    byte[] blob = cursor.getBlob(cursor.getColumnIndex(KEY_BITMAP));
 
-                    // Convert the byte array to Bitmap
-                    bitmaps.add(BitmapFactory.decodeByteArray(blob, 0, blob.length));
-                }
+                    // convert byte array to bitmap
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
 
+                    // initialize new item
+                    Item item = new Item();
+                    item.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
+                    item.setTitle(cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
+                    item.setBitmap(bitmap);
+
+                    // add item to list
+                    itemList.add(item);
+                } while(cursor.moveToNext());
             }
+            // successfully queried
             db.setTransactionSuccessful();
-
         }
         catch (SQLiteException e) {
             e.printStackTrace();
-
         }
         finally {
-            // End the transaction.
+            // end transaction
             db.endTransaction();
 
-            // Close database
+            // close database
             db.close();
         }
-        return bitmaps;
+        return itemList;
     }
 
-    public List<Bitmap> getBitmaps(int start, int end) {
+    public List<Item> getRangeItems(int start, int end) {
 
-        List<Bitmap> bitmaps = new ArrayList<>();
+        List<Item> itemList = new ArrayList<Item>();
 
-        // Open the database for reading
+        // open database for reading
         SQLiteDatabase db = this.getReadableDatabase();
 
+        // start transaction
         db.beginTransaction();
 
         try {
-            String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE db_id >= " + start + " AND db_id <= " + end;
+            String selectQuery = "SELECT * FROM " + TABLE_NAME
+                    + " WHERE " + KEY_ID + " >= " + start
+                    + " AND " + KEY_ID + " <= " + end;
+
             Cursor cursor = db.rawQuery(selectQuery, null);
-            if(cursor.getCount() > 0) {
-                while(cursor.moveToNext()) {
 
-                    // Convert blob data to byte array
-                    byte[] blob = cursor.getBlob(cursor.getColumnIndex("image"));
+            // loop through all rows and add to list
+            if(cursor.moveToFirst()) {
+                do {
+                    // convert blob data to byte array
+                    byte[] blob = cursor.getBlob(cursor.getColumnIndex(KEY_BITMAP));
 
-                    // Convert the byte array to Bitmap
-                    bitmaps.add(BitmapFactory.decodeByteArray(blob, 0, blob.length));
-                }
+                    // convert byte array to bitmap
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
 
+                    // initialize new item
+                    Item item = new Item();
+                    item.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
+                    item.setTitle(cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
+                    item.setBitmap(bitmap);
+
+                    // add item to list
+                    itemList.add(item);
+                } while(cursor.moveToNext());
             }
+            // successfully queried
             db.setTransactionSuccessful();
-
         }
         catch (SQLiteException e) {
             e.printStackTrace();
-
         }
         finally {
-            // End the transaction.
+            // end transaction
             db.endTransaction();
 
-            // Close database
+            // close database
             db.close();
         }
-        return bitmaps;
+        return itemList;
     }
 
-    public Bitmap getBitmapById(int id){
+    public Item getItemById(int id){
+        Item item = new Item();
 
-        Bitmap bitmap = null;
-
-        // Open the database for reading
+        // open database for reading
         SQLiteDatabase db = this.getReadableDatabase();
 
-        // Start the transaction.
+        // start the transaction.
         db.beginTransaction();
 
         try {
-            String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE db_id = " + id;
+            String selectQuery = "SELECT * FROM " + TABLE_NAME
+                    + " WHERE " + KEY_ID + " = " + id;
+
             Cursor cursor = db.rawQuery(selectQuery, null);
-            if(cursor.getCount() > 0) {
-                while (cursor.moveToNext()) {
 
-                    // Convert blob data to byte array
-                    byte[] blob = cursor.getBlob(cursor.getColumnIndex("image"));
+            if(cursor.moveToFirst()) {
+                // convert blob data to byte array
+                byte[] blob = cursor.getBlob(cursor.getColumnIndex(KEY_BITMAP));
 
-                    // Convert the byte array to Bitmap
-                    bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
-                }
+                // convert byte array to bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
 
+                item.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
+                item.setTitle(cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
+                item.setBitmap(bitmap);
             }
+            // successfully queried
             db.setTransactionSuccessful();
-
         }
         catch (SQLiteException e) {
             e.printStackTrace();
-
         }
         finally {
-            // End the transaction.
+            // end transaction
             db.endTransaction();
 
-            // Close database
+            // close database
             db.close();
         }
-        return bitmap;
-
+        return item;
     }
 
-    public Bitmap getBitmapByTitle(String title) {
-        Bitmap bitmap = null;
+    public Item getItemByTitle(String title) {
+        Item item = new Item();
 
-        // Open the database for reading
+        // open database for reading
         SQLiteDatabase db = this.getReadableDatabase();
 
-        // Start the transaction.
+        // start the transaction.
         db.beginTransaction();
 
         try {
-            String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE title = " + title;
+            String selectQuery = "SELECT * FROM " + TABLE_NAME
+                    + " WHERE " + KEY_TITLE + " = " + title;
+
             Cursor cursor = db.rawQuery(selectQuery, null);
-            if(cursor.getCount() > 0) {
-                while (cursor.moveToNext()) {
 
-                    // Convert blob data to byte array
-                    byte[] blob = cursor.getBlob(cursor.getColumnIndex("image"));
+            if(cursor.moveToFirst()) {
+                // convert blob data to byte array
+                byte[] blob = cursor.getBlob(cursor.getColumnIndex(KEY_BITMAP));
 
-                    // Convert the byte array to Bitmap
-                    bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
-                }
+                // convert byte array to bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
 
+                item.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
+                item.setTitle(cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
+                item.setBitmap(bitmap);
             }
+            // successfully queried
             db.setTransactionSuccessful();
-
         }
         catch (SQLiteException e) {
             e.printStackTrace();
-
         }
         finally {
-            // End the transaction.
+            // end transaction
             db.endTransaction();
 
-            // Close database
+            // close database
             db.close();
         }
-        return bitmap;
-
+        return item;
     }
 
+    public Item getItem(int id, String title) {
+        Item item = new Item();
+
+        // open database for reading
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // start the transaction.
+        db.beginTransaction();
+
+        try {
+            String selectQuery = "SELECT * FROM " + TABLE_NAME
+                    + " WHERE " + KEY_ID + " = " + id
+                    + " AND " + KEY_TITLE + " = " + title;
+
+            Cursor cursor = db.rawQuery(selectQuery, null);
+
+            if(cursor.moveToFirst()) {
+                // convert blob data to byte array
+                byte[] blob = cursor.getBlob(cursor.getColumnIndex(KEY_BITMAP));
+
+                // convert byte array to bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
+
+                item.setID(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));
+                item.setTitle(cursor.getString(cursor.getColumnIndex(KEY_TITLE)));
+                item.setBitmap(bitmap);
+            }
+            // successfully queried
+            db.setTransactionSuccessful();
+        }
+        catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+        finally {
+            // end transaction
+            db.endTransaction();
+
+            // close database
+            db.close();
+        }
+        return item;
+    }
 }
