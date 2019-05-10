@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.cmps121.asgn2.models.Item;
 import com.cmps121.asgn2.utils.DatabaseUtil;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.net.URL;
 
 public class DownloadActivity extends AppCompatActivity {
 
-    // Database helper class
+    // database handler
     private DatabaseUtil mDatabaseUtil;
 
     // EditTexts
@@ -72,47 +73,28 @@ public class DownloadActivity extends AppCompatActivity {
     // Asynchronous task to run download an image in background
     private class DownloadTask extends AsyncTask<String,Void,Bitmap> {
 
-        /*
-        private String TAG="DownloadTask.java";
-        private ProgressDialog p;
-        private Context ctx;
-        private String url;
-        private String title;
-        private Bitmap bitmap;
-
-        public DownloadTask(String url, String title, Context ctx)
-        {
-            Log.v(TAG, "Url Passed");
-            this.p=new ProgressDialog(ctx);
-            this.ctx=ctx;
-            this.url=url;
-            this.title=title;
-            this.bitmap=null;
-        }
-        */
-
         @Override
         protected Bitmap doInBackground(String...urls){
 
             Bitmap bitmap;
 
             try {
-                // Download the image
+                // download the image
                 URL url = new URL(urls[0]);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
                 connection.connect();
 
-                // Open input stream
+                // open input stream
                 InputStream inputStream = connection.getInputStream();
 
-                // Decode image to get smaller image to save memory
+                // decode image to get smaller image to save memory
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = 4;
                 bitmap = BitmapFactory.decodeStream(inputStream,null, options);
 
-                // Close input stream
+                // close input stream
                 inputStream.close();
             }
             catch(IOException e) {
@@ -122,7 +104,7 @@ public class DownloadActivity extends AppCompatActivity {
         }
 
         protected void onPreExecute(){
-            // Toast Message
+            // toast
             runOnUiThread(new Runnable() {
                 public void run() {
                     Toast.makeText(DownloadActivity.this, "Downloading...", Toast.LENGTH_LONG).show();
@@ -133,11 +115,16 @@ public class DownloadActivity extends AppCompatActivity {
         protected void onPostExecute(Bitmap result){
             mProgressBar.setVisibility(ProgressBar.VISIBLE);
 
-            // Insert bitmap to the database
             if(result != null) {
-                mDatabaseUtil.insertBitmap(result, mTitle); // insert image into bitmap using db util
+                // create a new item
+                Item item = new Item();
+                item.setTitle(mTitle);
+                item.setBitmap(result);
 
-                // Toast Message
+                // insert item into db using util
+                mDatabaseUtil.addItem(item);
+
+                // toast
                 runOnUiThread(new Runnable() {
                     public void run() {
                         Toast.makeText(DownloadActivity.this, "Download Successful", Toast.LENGTH_LONG).show();
@@ -145,7 +132,7 @@ public class DownloadActivity extends AppCompatActivity {
                 });
             }
             else {
-                // Toast Message
+                // toast
                 runOnUiThread(new Runnable() {
                     public void run() {
                         Toast.makeText(DownloadActivity.this, "Download Failed", Toast.LENGTH_LONG).show();

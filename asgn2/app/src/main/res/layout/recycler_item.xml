@@ -33,15 +33,31 @@
         <ImageView
             android:id="@+id/vImage"
             android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="0dp"
+            android:adjustViewBounds="true"
+            android:background="@color/cardview_dark_background"
+            android:gravity="center_vertical"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/vId"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="0dp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
-            android:adjustViewBounds="true"
-            android:background="@color/cardview_dark_background"
-            android:gravity="center_vertical"
-            android:scaleType="fitCenter" />
+            android:background="@color/colorTitleBackground"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:singleLine="true"
+            android:text="ID"
+            android:textColor="@android:color/white"
+            android:textSize="10dp" />
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

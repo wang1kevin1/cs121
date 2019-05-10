@@ -1,40 +1,49 @@
 package com.cmps121.asgn2;
 
-import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.cmps121.asgn2.adapters.RecyclerAdapter;
+import com.cmps121.asgn2.adapters.ItemRecyclerAdapter;
+import com.cmps121.asgn2.models.Item;
+import com.cmps121.asgn2.utils.DatabaseUtil;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class ViewActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    // database handler
+    private DatabaseUtil mDatabaseUtil;
 
-    private List<Bitmap> mDataset;
+    // RecyclerView
+    private RecyclerView itemRecyclerView;
+
+    // Adapter + layout manager
+    private ItemRecyclerAdapter itemAdapter;
+    private LinearLayoutManager layoutManager;
+
+    private ArrayList<Item> itemList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
 
-        recyclerView = findViewById(R.id.viewRecyclerView);
+        itemRecyclerView = findViewById(R.id.viewRecyclerView);
 
-
-
+        // populate items
+        itemList = new ArrayList<Item>(mDatabaseUtil.getAllItems());
 
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(ViewActivity.this,
                 LinearLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(layoutManager);
+        itemRecyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
-        mAdapter = new RecyclerAdapter(mDataset);
-        recyclerView.setAdapter(mAdapter);
+        // specify an adapter
+        itemAdapter = new ItemRecyclerAdapter(itemList, getApplication());
+
+        // set adapter
+        itemRecyclerView.setAdapter(itemAdapter);
     }
 }

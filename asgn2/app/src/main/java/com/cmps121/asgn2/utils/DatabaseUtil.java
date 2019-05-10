@@ -63,8 +63,8 @@ public class DatabaseUtil extends SQLiteOpenHelper {
      */
 
     public void addItem(Item item)  {
-        Bitmap bitmap = item.getBitmap();
         String title = item.getTitle();
+        Bitmap bitmap = item.getBitmap();
 
         // convert bitmap to byte array
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
