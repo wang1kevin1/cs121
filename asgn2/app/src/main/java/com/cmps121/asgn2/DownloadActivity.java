@@ -42,6 +42,8 @@ public class DownloadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download);
 
+        mDatabaseUtil = new DatabaseUtil(DownloadActivity.this);
+
         mEditURL = findViewById(R.id.downloadEditURL);
         mEditTitle = findViewById(R.id.downloadEditTitle);
 
@@ -56,8 +58,6 @@ public class DownloadActivity extends AppCompatActivity {
                 downloadImage(v);
             }
         });
-
-        mDatabaseUtil = new DatabaseUtil(this);
     }
 
     public void downloadImage(View view){
