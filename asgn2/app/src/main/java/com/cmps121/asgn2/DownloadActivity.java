@@ -35,8 +35,8 @@ public class DownloadActivity extends AppCompatActivity {
     private Button mButtonDownload;
 
     // Strings
-    private String mTitle;
     private String mURL;
+    private String mTitle;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +70,8 @@ public class DownloadActivity extends AppCompatActivity {
         }
     }
 
+    // https://stackoverflow.com/questions/5776851/load-image-from-url
+    // https://stackoverflow.com/questions/29188557/download-file-with-asynctask
     // Asynchronous task to run download an image in background
     private class DownloadTask extends AsyncTask<String,Void,Bitmap> {
 
@@ -88,7 +90,7 @@ public class DownloadActivity extends AppCompatActivity {
                 // open input stream
                 InputStream inputStream = connection.getInputStream();
 
-                // decode image to get smaller image to save memory
+                // decode to smaller image
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = 4;

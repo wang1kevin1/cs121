@@ -98,9 +98,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
     }
 
@@ -117,15 +114,19 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         db.beginTransaction();
 
         try {
-            if(getItemById(id) == null && getItemByTitle(title) == null)
+            if(getItemById(id) == null && getItemByTitle(title) == null) {
                 return false;
+            }
 
-            String deleteQuery = "DELETE FROM " + TABLE_NAME
-                    + " WHERE " + KEY_ID + " = " + id
-                    + " OR " + KEY_TITLE + " = " + title;
+            long i = db.delete(TABLE_NAME,
+                    KEY_ID + " = \'" + id + "\' OR " + KEY_TITLE + " = \'" + title + "\'",
+                    null);
 
-            // remove item
-            db.execSQL(deleteQuery);
+            if(i == 0) {
+                response = false;
+            }
+
+            Log.i("deleteItem", i + "");
 
             // successfully deleted
             db.setTransactionSuccessful();
@@ -137,9 +138,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         finally {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
         return response;
     }
@@ -186,9 +184,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         finally {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
         return itemList;
     }
@@ -238,9 +233,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         finally {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
         return itemList;
     }
@@ -280,9 +272,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         finally {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
         return item;
     }
@@ -322,9 +311,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         finally {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
         return item;
     }
@@ -365,9 +351,6 @@ public class DatabaseUtil extends SQLiteOpenHelper {
         finally {
             // end transaction
             db.endTransaction();
-
-            // close database
-            db.close();
         }
         return item;
     }

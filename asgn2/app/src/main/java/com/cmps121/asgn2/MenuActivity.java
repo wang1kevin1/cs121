@@ -34,6 +34,15 @@ public class MenuActivity extends AppCompatActivity {
                 }
             });
 
+        mButtonDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent =
+                        new Intent(MenuActivity.this, DeleteActivity.class);
+                startActivity(myIntent);
+            }
+        });
+
         mButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,17 +60,5 @@ public class MenuActivity extends AppCompatActivity {
                 startActivity(myIntent);
             }
         });
-
-        /*
-        mButtonDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent myIntent =
-                            new Intent(MenuActivity.this, DeleteActivity.class);
-                    finish();
-                    startActivity(myIntent);
-                }
-            });
-        */
     }
 }

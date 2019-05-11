@@ -7,10 +7,10 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".DownloadActivity">
+    tools:context=".DeleteActivity">
 
     <EditText
-        android:id="@+id/downloadEditID"
+        android:id="@+id/deleteEditID"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -47,7 +47,7 @@
         android:hint='Delete by Title'/>
 
     <Button
-        android:id="@+id/menuButtonDelete"
+        android:id="@+id/deleteButtonDelete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
