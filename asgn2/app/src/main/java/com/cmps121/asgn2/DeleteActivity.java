@@ -69,6 +69,8 @@ public class DeleteActivity extends AppCompatActivity {
 
             if (mDatabaseUtil.deleteItem(item)) {
                 Toast.makeText(DeleteActivity.this, "Image(s) Deleted", Toast.LENGTH_LONG).show();
+
+                DeleteActivity.this.finish();
             } else {
                 Toast.makeText(DeleteActivity.this, "No Image(s) Matched ID or Title", Toast.LENGTH_LONG).show();
             }

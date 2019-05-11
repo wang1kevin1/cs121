@@ -1,7 +1,10 @@
 package com.cmps121.asgn2;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +20,7 @@ import com.cmps121.asgn2.utils.DatabaseUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 
 public class DownloadActivity extends AppCompatActivity {
@@ -54,8 +58,12 @@ public class DownloadActivity extends AppCompatActivity {
         mButtonDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mProgressBar.setVisibility(ProgressBar.VISIBLE);
-                downloadImage(v);
+                if (isNetworkAvailable()) {
+                    mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                    downloadImage(v);
+                } else {
+                    Toast.makeText(DownloadActivity.this, "Internet Connectivity Issues", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -68,6 +76,14 @@ public class DownloadActivity extends AppCompatActivity {
         if(!mURL.trim().equals("")) {
             downloadTask.execute(mURL);
         }
+    }
+
+    // https://stackoverflow.com/questions/4238921/detect-whether-there-is-an-internet-connection-available-on-android
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     // https://stackoverflow.com/questions/5776851/load-image-from-url
