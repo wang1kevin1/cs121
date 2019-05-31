@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity
@@ -25,12 +26,40 @@ public class MainActivity extends AppCompatActivity
     private boolean serviceBound;
     private MyService myService;
 
+    private TextView mTextMessage;
+
+    private Button mButtonClear;
+    private Button mButtonExit;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mUiHandler = new Handler(getMainLooper(), new UiCallback());
         serviceBound = false;
+
+        mTextMessage = findViewById(R.id.mainTextMessage);
+        mTextMessage.setText("Everything was quiet");
+
+        mButtonClear = findViewById(R.id.mainButtonClear);
+        mButtonExit = findViewById(R.id.mainButtonExit);
+
+        mButtonClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mTextMessage.setText("Everything was quiet");
+                clear();
+            }
+        });
+
+        mButtonExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+
     }
 
     @Override
@@ -40,6 +69,10 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MyService.class);
         startService(intent);
         bindMyService();
+
+        if (serviceBound) {
+            didItMove();
+        }
     }
 
     private void bindMyService() {
@@ -71,8 +104,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Here is an example of a method that calls something in the service.
      */
-    void onButtonPress(View v) {
-        myService.doSomething(5, "hello");
+    boolean didItMove() {
+        return myService.didItMove();
+    }
+
+    void clear() {
+        myService.clear();
     }
 
     @Override
@@ -81,13 +118,6 @@ public class MainActivity extends AppCompatActivity
             Log.i("MyService", "Unbinding");
             unbindService(serviceConnection);
             serviceBound = false;
-            // If we like, stops the service.
-            if (true) {
-                Log.i(LOG_TAG, "Stopping.");
-                Intent intent = new Intent(this, MyService.class);
-                stopService(intent);
-                Log.i(LOG_TAG, "Stopped.");
-            }
         }
         super.onPause();
     }
@@ -99,7 +129,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResultReady(ServiceResult result) {
         if (result != null) {
-            Log.i(LOG_TAG, "Preparing a message for " + result.intValue);
+            Log.i(LOG_TAG, "Preparing a message for " + result.moved);
         } else {
             Log.e(LOG_TAG, "Received an empty result!");
         }
@@ -118,9 +148,10 @@ public class MainActivity extends AppCompatActivity
                 ServiceResult result = (ServiceResult) message.obj;
                 // Displays it.
                 if (result != null) {
-                    Log.i(LOG_TAG, "Displaying: " + result.intValue);
-                    TextView mainTextMessage = (TextView) findViewById(R.id.mainTextMessage);
-                    mainTextMessage.setText(Integer.toString(result.intValue));
+                    Log.i(LOG_TAG, "Displaying: " + result.moved);
+                    if (result.moved) {
+                        mTextMessage.setText("The phone moved!");
+                    }
                     // Tell the worker that the bitmap is ready to be reused
                 } else {
                     Log.e(LOG_TAG, "Error: received empty message!");

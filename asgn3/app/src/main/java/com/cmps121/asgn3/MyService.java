@@ -1,9 +1,10 @@
 package com.cmps121.asgn3;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -72,14 +73,17 @@ public class MyService extends Service {
     /**
      * Method that pretends to do something.
      */
-    public void doSomething (int i, String s) {
+    public boolean didItMove() {
         // We don't actually do anything, we need to ask the service thread to do it
         // for us.
-        myTask.doSomething(i, s);
+        return myTask.didItMove();
     }
 
     public void updateResultCallback(MyServiceTask.ResultCallback resultCallback) {
         myTask.updateResultCallback(resultCallback);
     }
 
+    public void clear() {
+        myTask.clear();
+    }
 }
