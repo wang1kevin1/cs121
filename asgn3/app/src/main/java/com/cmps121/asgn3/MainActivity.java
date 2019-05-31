@@ -38,28 +38,38 @@ public class MainActivity extends AppCompatActivity
         mUiHandler = new Handler(getMainLooper(), new UiCallback());
         serviceBound = false;
 
+        // initialize and set initial message
         mTextMessage = findViewById(R.id.mainTextMessage);
-        mTextMessage.setText("Everything was quiet");
+        mTextMessage.setText("Everything is quiet");
 
+        // initialize buttons
         mButtonClear = findViewById(R.id.mainButtonClear);
         mButtonExit = findViewById(R.id.mainButtonExit);
 
         mButtonClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mTextMessage.setText("Everything was quiet");
-                clear();
+                mTextMessage.setText("Everything is quiet"); // reset text
+                clear(); // reset timer and accel time
             }
         });
 
         mButtonExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // unbind service
+                if (serviceBound) {
+                    Log.i("MyService", "Unbinding");
+                    unbindService(serviceConnection);
+                    serviceBound = false;
+                }
+                // kill thread
+                terminate();
 
+                // end activity
+                finish();
             }
         });
-
-
     }
 
     @Override
@@ -70,6 +80,7 @@ public class MainActivity extends AppCompatActivity
         startService(intent);
         bindMyService();
 
+        // if there is a service currently bound, check if moved
         if (serviceBound) {
             didItMove();
         }
@@ -102,18 +113,29 @@ public class MainActivity extends AppCompatActivity
         }
     };
     /**
-     * Here is an example of a method that calls something in the service.
+     * calls didItMove
      */
     boolean didItMove() {
         return myService.didItMove();
     }
 
+    /**
+     * MyServiceTask: reset timer, reset first_accel_time
+     */
     void clear() {
         myService.clear();
     }
 
+    /**
+     * MyServiceTask: stopProcessing
+     */
+    void terminate() {
+        myService.terminate();
+    }
+
     @Override
     protected void onPause() {
+        // unbind on pause, but process continues running
         if (serviceBound) {
             Log.i("MyService", "Unbinding");
             unbindService(serviceConnection);

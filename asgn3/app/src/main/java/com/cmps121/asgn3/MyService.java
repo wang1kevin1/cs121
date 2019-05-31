@@ -1,12 +1,10 @@
 package com.cmps121.asgn3;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 public class MyService extends Service {
@@ -16,6 +14,9 @@ public class MyService extends Service {
     // Motion detector thread and runnable.
     private Thread myThread;
     private MyServiceTask myTask;
+
+    // wakelock for CPU control
+    private PowerManager.WakeLock wakeLock;
 
     // Binder class.
     public class MyBinder extends Binder {
@@ -53,6 +54,15 @@ public class MyService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.i(LOG_TAG, "Received start id " + startId + ": " + intent);
+
+        // acquire CPU
+        PowerManager powerManager =
+                (PowerManager)getSystemService(POWER_SERVICE);
+        wakeLock=
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"DidItMove::WakeLockService"
+                );
+        wakeLock.acquire();
+
         // We start the task thread.
         if (!myThread.isAlive()) {
             myThread.start();
@@ -67,23 +77,28 @@ public class MyService extends Service {
         Log.i(LOG_TAG, "Stopping.");
         // Stops the motion detector.
         myTask.stopProcessing();
-        Log.i(LOG_TAG, "Stopped.");
-    }
 
-    /**
-     * Method that pretends to do something.
-     */
-    public boolean didItMove() {
-        // We don't actually do anything, we need to ask the service thread to do it
-        // for us.
-        return myTask.didItMove();
+        // release CPU
+        wakeLock.release();
+        Log.i(LOG_TAG, "Stopped.");
     }
 
     public void updateResultCallback(MyServiceTask.ResultCallback resultCallback) {
         myTask.updateResultCallback(resultCallback);
     }
 
+    //calls diditMove
+    public boolean didItMove() {
+        return myTask.didItMove();
+    }
+
+    // reset timer and accel_time
     public void clear() {
         myTask.clear();
+    }
+
+    // stopProcessing
+    public void terminate() {
+        myTask.stopProcessing();
     }
 }
