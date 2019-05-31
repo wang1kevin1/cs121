@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">asgn3</string>
+
+    <string name="did_it_move">DidItMove</string>
 </resources>
