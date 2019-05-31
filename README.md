@@ -4,4 +4,4 @@ Asgn1: work with shared preferences
 
 Asgn2: sqlite CRUD methods, sort/filter & range, image bit encoding, image downloading, async tasks
 
-Asgn3: 
+Asgn3: background services, motion sensors, thread mutex
